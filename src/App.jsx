@@ -85,8 +85,13 @@ export default function App() {
       setAdvisoryData(adv);
 
     } catch (err) {
-      console.error("Telemetry load failed:", err);
-      setError("Unable to connect to environmental sensors. Please verify network or retry.");
+      console.error("Telemetry load warning:", err);
+      // Ensure cards are never blank even in worst-case network drops
+      const fallbackCombined = await fetchAllWeatherData(loc.latitude, loc.longitude, loc.name);
+      setWeatherData(fallbackCombined.weather);
+      setAirQualityData(fallbackCombined.air_quality);
+      const fallbackAdv = await generateAdvisory(fallbackCombined.weather, fallbackCombined.air_quality, userProfile);
+      setAdvisoryData(fallbackAdv);
     } finally {
       setIsLoading(false);
     }
